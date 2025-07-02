@@ -29,14 +29,14 @@ class Trading_bot:
             writer.writerow([datetime.now(), symbol, side, quantity, price])
 
     @staticmethod
-    def place_buy_order(symbol, quantity=1):
+    def place_buy_order(symbol, quantity=100):
         print("BUY")
         order = client.order_market_buy(symbol=symbol, quantity=quantity)
         price = float(order['fills'][0]['price'])
         Trading_bot.log_trade_to_csv('BUY', symbol, quantity, price)
 
     @staticmethod
-    def place_sell_order(symbol, quantity=1):
+    def place_sell_order(symbol, quantity=100):
         print("SELL")
         order = client.order_market_sell(symbol=symbol, quantity=quantity)
         price = float(order['fills'][0]['price'])
@@ -45,7 +45,7 @@ class Trading_bot:
     
     @staticmethod
     def buy_sell_order_condition(symbol):
-        df_15=client.get_klines(symbol=symbol,interval=Client.KLINE_INTERVAL_1MINUTE, limit=500)
+        df_15=client.get_klines(symbol=symbol,interval=Client.KLINE_INTERVAL_1MINUTE, limit=100)
         df_15=Trading_bot.convert_to_dataframe(df_15)
         sma_50=SMAIndicator(df_15['Close'],window=50).sma_indicator()
         sma_200=SMAIndicator(df_15['Close'],window=100).sma_indicator()
@@ -73,9 +73,13 @@ class Trading_bot:
         df['Volume'] = pd.to_numeric(df['Volume'], errors='coerce')
         return df
 
-bot =Trading_bot('EPICUSDT')
+Trading_bot.place_sell_order('BMTUSDT')
+print()
+print()
+print(client.get_account())
+bot =Trading_bot('BMTUSDT')
 start_time = time.time()
 duration = 5 * 60  # 5 minutes in seconds
 
 while time.time() - start_time < duration:
-    Trading_bot.buy_sell_order_condition('BTCUSDT')
+    Trading_bot.buy_sell_order_condition('BMTUSDT')
